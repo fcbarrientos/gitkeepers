@@ -13,3 +13,7 @@ If it's not there yet, **run `python run.py` first**.
 ### For Unix-based systems
 
 TBA
+
+## For downloading the model
+
+Run `python download_model.py`.

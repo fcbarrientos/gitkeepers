@@ -3,5 +3,6 @@ uvicorn
 sqlite-vec
 platformdirs
 # Install when you're ready to run a model:
-# llama-cpp-python
+huggingface_hub
+llama-cpp-python
 # ^ subject to change

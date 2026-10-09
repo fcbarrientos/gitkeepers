@@ -7,7 +7,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from core import config
-from core.inference import MockLLM
+from core.inference import MockLLM, LlamaCppLLM
 from core.storage import connect, get_db
 
 
@@ -27,7 +27,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 get_db().close()  # run migrations once at startup
-llm = MockLLM()  # swap for LlamaCppLLM(path) once a model is downloaded
+model_path = config.MODELS_DIR / "Qwen3-4B-Q4_K_M.gguf"
+llm = LlamaCppLLM(model_path=str(model_path))
+# llm = MockLLM() - fallback when file missing
 
 
 class ChatRequest(BaseModel):
