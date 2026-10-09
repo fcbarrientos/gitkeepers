@@ -6,3 +6,4 @@ __pycache__/
 backend/evals/results
 project_handoff.txt
 backend/backend.md
+backend/DO_NOT_COMMIT.py

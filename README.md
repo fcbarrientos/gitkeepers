@@ -40,6 +40,52 @@ python run.py --port 8765
 
 Interactive API documentation: `http://127.0.0.1:8765/docs`
 
+### Frontend API
+
+The backend is usable without a frontend. Its versioned HTTP contract is published at
+`http://127.0.0.1:8765/docs` and `/openapi.json`; frontend clients can generate typed
+bindings from that OpenAPI schema. New feature endpoints live under `/api/v1`, including
+the versioned chat and conversation endpoints. The original unversioned chat and
+conversation paths remain available for existing clients.
+
+Household and patient records:
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/api/v1/households` | Register a household, optionally with its first members in one transaction |
+| `GET` | `/api/v1/households?q=&limit=25&offset=0` | Search and page through households |
+| `GET` | `/api/v1/households/{household_id}` | Get a household and its members |
+| `POST` | `/api/v1/households/{household_id}/members` | Register another household member |
+| `GET` | `/api/v1/patients?q=&household_id=&limit=25&offset=0` | Search and page through patients |
+| `GET` | `/api/v1/patients/{patient_id}` | Get a patient and household location |
+
+To register a household and its first member in one request:
+
+```json
+{
+  "barangay": "Barangay name",
+  "sitio": "Sitio name",
+  "members": [
+    {
+      "full_name": "Member name",
+      "birth_date": "1990-01-31",
+      "sex": "female",
+      "is_household_head": true
+    }
+  ]
+}
+```
+
+List responses use `{ "items": [], "total": 0, "limit": 25, "offset": 0 }`.
+Search matches household location and member names, or patient names and contact
+numbers using token-prefix full-text search. Limits are capped at 100. Every endpoint
+other than `/health` uses the configured `X-API-Token` check when `API_TOKEN` is set.
+
+Use this same resource-oriented, versioned contract for future visits, referrals,
+inventory, reporting, and sync APIs: validated request/response schemas, bounded
+pagination, feature-specific routers, service-layer database operations, and
+numbered migrations. This keeps frontend calls stable and discoverable as features grow.
+
 **Windows note for llama-cpp-python:** If compilation fails, install the Microsoft C++ Build Tools, or install a prebuilt CPU wheel:
 ```bash
 pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu

@@ -1,6 +1,7 @@
 """SQLite storage: one file, numbered migrations, optional vector search"""
 import re
 import sqlite3
+from collections.abc import Iterator
 from pathlib import Path
 
 from core.config import DB_PATH, MIGRATIONS_DIR, ensure_dirs
@@ -51,7 +52,9 @@ def enable_vectors(conn: sqlite3.Connection, dim: int) -> None:
     )
 
 
-def get_db() -> sqlite3.Connection:
+def get_db() -> Iterator[sqlite3.Connection]:
     conn = connect()
-    migrate(conn)
-    return conn
+    try:
+        yield conn
+    finally:
+        conn.close()
