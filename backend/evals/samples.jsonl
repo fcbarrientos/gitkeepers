@@ -1,0 +1,27 @@
+// FAKE SCENARIOS NOT REAL
+
+{"id": "s01", "note": "Buntis po si Maria, 28 weeks na. Mataas ang BP niya, 140 over 90. Walang lagnat.", "expected": {"weeks_pregnant": 28, "bp_systolic": 140, "bp_diastolic": 90, "fever": false}}
+{"id": "s02", "note": "Nagkaroon po ng pagdurugo kagabi, tapos masakit ang ulo niya.", "expected": {"bleeding": true, "headache": true}}
+{"id": "s03", "note": "36 weeks na siya, normal naman ang BP, 110/70. Okay ang galaw ng baby.", "expected": {"weeks_pregnant": 36, "bp_systolic": 110, "bp_diastolic": 70, "baby_moving": true}}
+{"id": "s04", "note": "Walang lagnat, walang pagdurugo. Pero nahihilo daw siya.", "expected": {"fever": false, "bleeding": false, "dizziness": true}}
+{"id": "s05", "note": "Pregnant si Ana, mga 20 weeks. May fever siya, 38.5 yung temp.", "expected": {"weeks_pregnant": 20, "temperature_c": 38.5, "fever": true}}
+{"id": "s06", "note": "Hindi na raw gumagalaw ang baby simula kahapon. 32 weeks na po.", "expected": {"baby_moving": false, "weeks_pregnant": 32}}
+{"id": "s07", "note": "Kumusta na po si Nanay? Okay naman po siya, walang reklamo.", "expected": {}}
+{"id": "s08", "note": "BP 90/60, nahihilo at masakit ang ulo. 24 weeks.", "expected": {"bp_systolic": 90, "bp_diastolic": 60, "dizziness": true, "headache": true, "weeks_pregnant": 24}}
+{"id": "s09", "note": "Patient is 30 weeks pregnant, temp 37.2, no bleeding, no headache.", "expected": {"weeks_pregnant": 30, "temperature_c": 37.2, "bleeding": false, "headache": false}}
+{"id": "s10", "note": "Nag-bleed siya kanina, mga 12 weeks pa lang po.", "expected": {"bleeding": true, "weeks_pregnant": 12}}
+{"id": "s11", "note": "Nagsusuka pa siya kaninang umaga, mga ilang beses na.", "expected": {"vomiting": true}}
+{"id": "s12", "note": "Inuubo at sinisipon po ang pasyente mula pa noong makalawa. May lagnat na 38.3 C pero walang pananakit ng dibdib.", "expected": {"cough": true, "colds": true, "fever": true, "temperature_c": 38.3, "chest_pain": false}}
+{"id": "s13", "note": "Nagtatae at nagsusuka simula kagabi, masakit din ang tiyan. BP 90/60, walang lagnat.", "expected": {"diarrhea": true, "vomiting": true, "abdominal_pain": true, "bp_systolic": 90, "bp_diastolic": 60, "fever": false}}
+{"id": "s14", "note": "Masikip ang dibdib at nahihilo si Tatay. Mataas ang presyon, 170 over 100. Walang ubo.", "expected": {"chest_pain": true, "dizziness": true, "bp_systolic": 170, "bp_diastolic": 100, "cough": false}}
+{"id": "s15", "note": "Masakit ang lalamunan kapag lumulunok at may lagnat, 38.8 temp. Masakit din ang ulo pero walang sipon.", "expected": {"sore_throat": true, "fever": true, "temperature_c": 38.8, "headache": true, "colds": false}}
+{"id": "s16", "note": "Hinihingal at hirap huminga si patient dahil sa asthma. May ubo pero walang lagnat at walang sipon.", "expected": {"shortness_of_breath": true, "cough": true, "fever": false, "colds": false}}
+{"id": "s17", "note": "May mga pantal at rashes sa buong braso at binti pagkatapos kumain ng hipon. Nahihilo pero hindi naman hirap huminga.", "expected": {"rash": true, "dizziness": true, "shortness_of_breath": false}}
+{"id": "s18", "note": "39.2 ang lagnat, masakit ang buong katawan at ulo. May lumabas na kaunting pantal sa balat pero walang ubo o sipon.", "expected": {"temperature_c": 39.2, "fever": true, "body_pain": true, "headache": true, "rash": true, "cough": false, "colds": false}}
+{"id": "s19", "note": "Sobrang sakit ng tiyan pagkatapos kumain kanina tapos nagsusuka. Walang pagtatae at normal ang BP, 120/80.", "expected": {"abdominal_pain": true, "vomiting": true, "diarrhea": false, "bp_systolic": 120, "bp_diastolic": 80}}
+{"id": "s20", "note": "Masakit ang ulo at nananakit ang katawan dahil sa pagod. Walang lagnat, 36.5 C ang temp, presyon 110/70.", "expected": {"headache": true, "body_pain": true, "fever": false, "temperature_c": 36.5, "bp_systolic": 110, "bp_diastolic": 70}}
+{"id": "s21", "note": "Malala ang ubo na may plema, makati ang lalamunan at kapos sa paghinga. Walang pagsusuka.", "expected": {"cough": true, "sore_throat": true, "shortness_of_breath": true, "vomiting": false}}
+{"id": "s22", "note": "Nagsusuka at nagtatae nang sunod-sunod, 38.0 ang lagnat at nahihilo na sa panghihina.", "expected": {"vomiting": true, "diarrhea": true, "fever": true, "temperature_c": 38.0, "dizziness": true}}
+{"id": "s23", "note": "Nagpa-BP si Kuya para sa maintenance, 130/85. Walang pananakit ng dibdib, walang hilo, at walang sakit ng ulo.", "expected": {"bp_systolic": 130, "bp_diastolic": 85, "chest_pain": false, "dizziness": false, "headache": false}}
+{"id": "s24", "note": "Sinisipon at inuubo, masakit ang katawan pero walang lagnat at hindi masakit ang lalamunan.", "expected": {"colds": true, "cough": true, "body_pain": true, "fever": false, "sore_throat": false}}
+{"id": "s25", "note": "Nagkaroon ng pantal sa mukha at leeg tapos biglang nahirapang huminga at nahilo. BP 100/60.", "expected": {"rash": true, "shortness_of_breath": true, "dizziness": true, "bp_systolic": 100, "bp_diastolic": 60}}

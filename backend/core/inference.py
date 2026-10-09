@@ -29,6 +29,16 @@ class LlamaCppLLM(LLM):
             if piece:
                 yield piece
 
+    def chat_json(self, messages, schema, max_tokens=512):
+        try:
+            out = self.llm.create_chat_completion(
+                messages=messages, max_tokens=max_tokens, temperature=0.0,
+                response_format={"type": "json_object", "schema": schema})
+        except Exception:  # if the schema grammar is rejected, fall back to plain output
+            out = self.llm.create_chat_completion(
+                messages=messages, max_tokens=max_tokens, temperature=0.0)
+        return out["choices"][0]["message"]["content"]
+
 
 class MockLLM(LLM):
     """Lets the frontend team build against the API before any model exists."""

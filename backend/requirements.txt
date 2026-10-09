@@ -2,6 +2,7 @@ fastapi
 uvicorn
 sqlite-vec
 platformdirs
+cryptography
 # Install when you're ready to run a model:
 huggingface_hub
 llama-cpp-python

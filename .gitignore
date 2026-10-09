@@ -3,3 +3,6 @@ data/
 __pycache__/
 *.db
 .env
+backend/evals/results
+project_handoff.txt
+backend/backend.md
