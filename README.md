@@ -155,26 +155,56 @@ pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-c
 
 ## Frontend (web app)
 
-The web app lives in `frontend/` (React + TypeScript + Vite, installable as a PWA). In
-production the backend serves the built app on its own port, so health workers open
-`http://127.0.0.1:8765/` on the laptop that runs it.
+The web app lives in `frontend/` and is built with React, TypeScript, Vite, and a client-side routing setup for the offline healthcare workflow. The app is designed to run as a local-first PWA and is served by the backend in production at `http://127.0.0.1:8765/`.
 
-Current limits:
-- `run.py` listens on `127.0.0.1` only, so phones on the same Wi-Fi cannot reach it yet. Opening
-  it to the network would also need HTTPS for the PWA (offline shell, install) to work on phones.
-- Leave `API_TOKEN` unset when using the built-in web app: the app does not send `X-API-Token`,
-  so with a token set nobody can sign in. The token is for a desktop shell that calls the API itself.
+### Current frontend feature set
+
+The frontend now includes a complete clinic workflow across all major operational screens:
+
+- Authentication and onboarding: `/login`, `/signup`, profile management, admin user approval, account listing, password updates, and role-based access control.
+- Dashboard: summary cards for households, patients, visits, follow-ups, low-stock items, open referral flags, sync status, and recent activity with bilingual charts and alerts.
+- Records and households: household registration, member creation, household detail view, patient lists, patient profiles, and visit history.
+- Checkups and AI entry: visit creation, form-based data entry for prenatal / child-growth / BP follow-up forms, AI suggestion review, confirm/accept/edit provenance tracking, and draft/final visit handling.
+- Follow-ups: due, overdue, upcoming, and completed follow-up tracking with scheduling and completion actions.
+- Referrals: open flags, referral intake, referral slips, printable slip layout, urgency handling, and referral history.
+- Supplies: inventory list, stock movements, request list, low-stock badges, and item-detail tracking for received/distributed/adjusted stock.
+- Reports: period summaries, comparison views, aggregated health reporting cards, AI draft generation/editing/approval, and unsynced data alerting.
+- Sync: manual bundle export, passphrase setup, receipt import, bundle history, and pending/awaiting/synced record tracking.
+
+### Frontend route map
+
+The app routes are organized as follows:
+
+- `/` → dashboard
+- `/profile` → user profile
+- `/admin/users` → admin user management
+- `/households` and `/households/new` → household search and registration
+- `/households/:householdId` → household details
+- `/patients` and `/patients/:patientId` → patient directory and record pages
+- `/patients/:patientId/visits/new` and `/visits/:visitId` → checkup forms and visit editing
+- `/checkups` → visit log and checkup list
+- `/follow-ups` → follow-up tracker
+- `/referrals`, `/referrals/new`, `/referrals/:referralId/slip` → referral management and print slip
+- `/supplies`, `/supplies/request-list`, `/supplies/:itemId` → stock management
+- `/reports` → reporting dashboard and draft approvals
+- `/sync` → data transfer and RHU receipt workflow
+
+### Frontend development and build commands
 
 ```bash
 cd frontend
 npm install
 npm run build        # writes frontend/dist, which the backend serves at /
-npm run dev          # development: http://localhost:5173, proxies /api to 127.0.0.1:8765
+npm run dev          # development server: http://localhost:5173, proxies /api to 127.0.0.1:8765
 npm test             # unit and component tests (Vitest)
 ```
 
-The UI has English and Filipino (toggle in the header). Data never leaves the backend's
-SQLite database; the service worker caches only the app shell.
+### Frontend behavior and constraints
+
+- The app supports English and Filipino language toggling in the UI.
+- Data remains stored in the backend SQLite database; the app shell is cached locally but the service worker does not store patient data beyond the app shell.
+- `run.py` binds to `127.0.0.1`, so it is currently local-only; turning it into a network service would require HTTPS and additional deployment/security considerations for PWA behavior.
+- Leave `API_TOKEN` unset when using the built-in web app. The token is intended for desktop shell callers, not the browser app.
 
 ---
 
