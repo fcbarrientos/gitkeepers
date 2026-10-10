@@ -176,5 +176,162 @@ export interface Dashboard {
   drafts: number;
   households: number;
   patients: number;
+  referral_flags_open: number;
+  low_stock: number;
+  unsynced: number;
   ai: AIStatus;
+}
+
+export type Urgency = "urgent" | "routine";
+
+export interface ReferralFlag {
+  id: string;
+  visit_id: string;
+  patient_id: string;
+  patient_name: string;
+  rule_id: string;
+  reason_en: string;
+  reason_fil: string;
+  urgency: Urgency;
+  status: "open" | "referred" | "dismissed";
+  dismiss_note: string | null;
+  created_at: string;
+  form_type: string;
+  visit_date: string;
+}
+
+export interface Referral {
+  id: string;
+  patient_id: string;
+  patient_name: string;
+  birth_date: string | null;
+  sex: Sex | null;
+  barangay: string;
+  sitio: string | null;
+  flag_id: string | null;
+  facility: string;
+  reason: string;
+  urgency: Urgency;
+  notes: string | null;
+  status: "issued" | "sent";
+  created_by: string;
+  created_by_name: string;
+  created_at: string;
+  updated_at: string;
+  visit: { id: string; form_type: string; visit_date: string; values: Values } | null;
+}
+
+export interface ReferralInput {
+  patient_id: string;
+  flag_id: string | null;
+  facility: string;
+  reason: string;
+  urgency: Urgency;
+  notes: string | null;
+}
+
+export interface SupplyItem {
+  id: string;
+  name: string;
+  unit: string;
+  low_stock_threshold: number;
+  target_level: number;
+  active: boolean;
+  on_hand: number;
+  low: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupplyItemInput {
+  name: string;
+  unit: string;
+  low_stock_threshold: number;
+  target_level: number;
+}
+
+export type MovementKind = "received" | "distributed" | "adjusted";
+
+export interface SupplyMovement {
+  id: string;
+  item_id: string;
+  kind: MovementKind;
+  quantity: number;
+  movement_date: string;
+  note: string | null;
+  recorded_by: string;
+  recorded_by_name: string;
+  created_at: string;
+}
+
+export interface RequestItem extends SupplyItem {
+  request_quantity: number;
+}
+
+export type Period = "week" | "month";
+
+export interface ReportFigures {
+  start: string;
+  end: string;
+  visits: { total: number; final: number; by_form: Record<string, number> };
+  new_households: number;
+  new_patients: number;
+  follow_ups_completed: number;
+  follow_ups_overdue: number;
+  referral_flags: number;
+  referrals_issued: number;
+  referrals_by_reason: Record<string, number>;
+  supplies: { name: string; unit: string; received: number; distributed: number }[];
+  low_stock_items: string[];
+}
+
+export interface ReportSummary {
+  period: Period;
+  current: ReportFigures;
+  previous: ReportFigures;
+  unsynced_records: number;
+}
+
+export interface ReportDraft {
+  id: string;
+  period: Period;
+  start_date: string;
+  end_date: string;
+  figures: ReportSummary;
+  text: string;
+  status: "draft" | "approved";
+  model: string | null;
+  created_by: string;
+  approved_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SyncCounts {
+  pending: number;
+  awaiting: number;
+  synced: number;
+}
+
+export interface SyncStatus {
+  station_id: string;
+  passphrase_set: boolean;
+  records: Record<string, SyncCounts>;
+  last_acknowledged_at: string | null;
+  open_bundles: number;
+}
+
+export interface SyncBundleSummary {
+  id: string;
+  record_count: number;
+  created_at: string;
+  acknowledged_at: string | null;
+  created_by_name: string;
+}
+
+export interface SyncBundle {
+  bundle_id: string;
+  station_id: string;
+  record_count: number;
+  [key: string]: unknown;
 }

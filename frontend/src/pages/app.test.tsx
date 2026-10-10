@@ -5,6 +5,8 @@ import { renderApp } from "../test/render";
 
 const homeData: Record<string, Route> = {
   "GET /dashboard": [200, dashboard], "GET /visits": [200, page([])], "GET /forms": [200, []],
+  "GET /follow-ups": [200, page([])], "GET /referrals": [200, page([])], "GET /sync/bundles": [200, []],
+  "GET /supplies": [200, []], "GET /ai/status": [200, dashboard.ai],
 };
 
 describe("signing in", () => {
@@ -54,7 +56,7 @@ describe("signing in", () => {
     await user.type(await screen.findByLabelText("Username or email"), "admin");
     await user.type(screen.getByLabelText("Password"), "correct-horse");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
-    expect(await screen.findByRole("heading", { name: "Today" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: /Ada/ })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/");
   });
 });
@@ -63,7 +65,7 @@ describe("app shell", () => {
   it("shows a retry screen when the server stops responding", async () => {
     mockApi({ ...signedInAs(admin), ...homeData, "GET /dashboard": "network" });
     renderApp("/", { signedIn: true });
-    expect(await screen.findByRole("heading", { name: "Can't reach the GitKeepers server on this laptop" }))
+    expect(await screen.findByRole("heading", { name: "Can't reach the RuPort AI server on this laptop" }))
       .toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
   });
@@ -89,12 +91,45 @@ describe("app shell", () => {
 });
 
 describe("dashboard", () => {
-  it("shows the counts and links them, but not the coming-soon cards", async () => {
+  it("shows the real counts and links each one to its filtered list", async () => {
     mockApi({ ...signedInAs(admin), ...homeData });
     renderApp("/", { signedIn: true });
-    const overdue = (await screen.findByRole("heading", { name: "Overdue" })).closest("a");
+    const stats = await screen.findByRole("navigation", { name: "Key figures" });
+    const overdue = within(stats).getByRole("link", { name: /Overdue follow-ups/ });
     expect(overdue).toHaveAttribute("href", "/follow-ups?state=overdue");
-    expect(within(overdue!).getByText("3")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Referrals" }).closest("a")).toBeNull();
+    expect(within(overdue).getByText("3")).toBeInTheDocument();
+    expect(within(stats).getByRole("link", { name: /Open referral flags/ })).toHaveAttribute("href", "/referrals");
+    expect(within(stats).getByRole("link", { name: /Not yet synced/ })).toHaveAttribute("href", "/sync");
+    expect(within(stats).getByRole("link", { name: /Patients/ })).toHaveAttribute("href", "/patients");
+  });
+
+  it("lists what needs attention, most urgent first, without inventing items", async () => {
+    mockApi({ ...signedInAs(admin), ...homeData });
+    renderApp("/", { signedIn: true });
+    const panel = (await screen.findByRole("heading", { name: "Needs attention" })).closest("section")!;
+    const items = within(panel).getAllByRole("link").map((link) => link.textContent);
+    expect(items[0]).toContain("Overdue follow-ups: 3");
+    expect(items[1]).toContain("Referral flags to review: 2");
+    expect(items.join(" ")).toContain("Supplies at or below low-stock level: 1");
+    expect(items).toHaveLength(6);
+  });
+
+  it("shows badges in the sidebar from the dashboard counts", async () => {
+    mockApi({ ...signedInAs(admin), ...homeData });
+    renderApp("/", { signedIn: true });
+    const nav = await screen.findByRole("navigation", { name: "Main menu" });
+    expect(await within(nav).findByRole("link", { name: /Follow-ups.*4 pending/ })).toHaveAttribute("href", "/follow-ups");
+    expect(within(nav).getByRole("link", { name: /Checkups.*1 pending/ })).toHaveAttribute("href", "/checkups");
+  });
+});
+
+describe("checkups list", () => {
+  it("filters checkups by status through the URL", async () => {
+    const { calls } = mockApi({ ...signedInAs(admin), "GET /visits": [200, page([])], "GET /forms": [200, []] });
+    const { user, router } = renderApp("/checkups", { signedIn: true });
+    await user.click(await screen.findByRole("tab", { name: "Draft" }));
+    expect(router.state.location.search).toBe("?status=draft");
+    await screen.findByText("No checkups match these filters.");
+    expect(calls.map((c) => c.path)).toContain("/visits?status=draft&limit=25&offset=0");
   });
 });

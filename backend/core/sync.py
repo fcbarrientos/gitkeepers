@@ -53,9 +53,9 @@ def decrypt_vault(encrypted_vault: dict[str, str], secret_key: bytes | str) -> d
 
 
 def create_sync_bundle(records: list[dict[str, Any]], station_id: str,
-                       secret_key: bytes | str) -> dict[str, Any]:
+                       secret_key: bytes | str, pseudonymizer: Pseudonymizer | None = None) -> dict[str, Any]:
     """Package clinical records into a secure, de-identified sync bundle."""
-    pseudonymizer = Pseudonymizer(salt=f"rhu-sync-{station_id}")
+    pseudonymizer = pseudonymizer or Pseudonymizer(salt=f"rhu-sync-{station_id}")
     deidentified_records = [pseudonymizer.pseudonymize_record(r) for r in records]
     encrypted_vault = encrypt_vault(pseudonymizer.vault, secret_key)
 

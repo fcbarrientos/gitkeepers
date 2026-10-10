@@ -2,8 +2,16 @@ import type { RouteObject } from "react-router-dom";
 import { RequireAdmin, RequireAuth } from "./auth/guards";
 import { Layout } from "./components/Layout";
 import { CheckupPage } from "./pages/CheckupPage";
-import { ComingSoonPage } from "./pages/ComingSoonPage";
+import { CheckupsPage } from "./pages/CheckupsPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { ReportsPage } from "./pages/ReportsPage";
+import { SuppliesPage } from "./pages/SuppliesPage";
+import { SupplyItemPage } from "./pages/SupplyItemPage";
+import { SupplyRequestPage } from "./pages/SupplyRequestPage";
+import { SyncPage } from "./pages/SyncPage";
+import { ReferralsPage } from "./pages/ReferralsPage";
+import { ReferralSlipPage } from "./pages/ReferralSlipPage";
+import { ReferralNewPage } from "./pages/ReferralNewPage";
 import { FollowUpsPage } from "./pages/FollowUpsPage";
 import { HouseholdNewPage } from "./pages/HouseholdNewPage";
 import { HouseholdPage } from "./pages/HouseholdPage";
@@ -35,10 +43,6 @@ export const routes: RouteObject[] = [
       { index: true, element: <DashboardPage /> },
       { path: "profile", element: <ProfilePage /> },
       { path: "admin/users", element: <RequireAdmin><UsersPage /></RequireAdmin> },
-      { path: "referrals", element: <ComingSoonPage titleKey="nav.referrals" /> },
-      { path: "supplies", element: <ComingSoonPage titleKey="nav.supplies" /> },
-      { path: "reports", element: <ComingSoonPage titleKey="nav.reports" /> },
-      { path: "sync", element: <ComingSoonPage titleKey="nav.sync" /> },
       { path: "households", element: <HouseholdsPage /> },
       { path: "households/new", element: <HouseholdNewPage /> },
       { path: "households/:householdId", element: <HouseholdPage /> },
@@ -46,7 +50,16 @@ export const routes: RouteObject[] = [
       { path: "patients/:patientId", element: <PatientPage /> },
       { path: "patients/:patientId/visits/new", element: <CheckupPage /> },
       { path: "visits/:visitId", element: <CheckupPage /> },
+      { path: "checkups", element: <CheckupsPage /> },
       { path: "follow-ups", element: <FollowUpsPage /> },
+      { path: "referrals", element: <ReferralsPage /> },
+      { path: "referrals/new", element: <ReferralNewPage /> },
+      { path: "referrals/:referralId/slip", element: <ReferralSlipPage /> },
+      { path: "supplies", element: <SuppliesPage /> },
+      { path: "supplies/request-list", element: <SupplyRequestPage /> },
+      { path: "supplies/:itemId", element: <SupplyItemPage /> },
+      { path: "reports", element: <ReportsPage /> },
+      { path: "sync", element: <SyncPage /> },
       { path: "*", element: <NotFoundPage /> },
     ],
   },

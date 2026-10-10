@@ -24,11 +24,13 @@ class Pseudonymizer:
         if not raw_value or not raw_value.strip():
             return raw_value
         clean = raw_value.strip()
-        cache_key = (entity_type.upper(), clean.lower())
+        # Free text is restored verbatim, so its case is part of its identity.
+        folded = clean if entity_type.upper() == "TEXT" else clean.lower()
+        cache_key = (entity_type.upper(), folded)
         if cache_key in self._cache:
             return self._cache[cache_key]
 
-        digest = hmac.new(self.salt, f"{entity_type}:{clean.lower()}".encode("utf-8"), hashlib.sha256).hexdigest()
+        digest = hmac.new(self.salt, f"{entity_type}:{folded}".encode("utf-8"), hashlib.sha256).hexdigest()
         short_id = digest[:8].upper()
         prefix = {
             "PATIENT": "PSN-PAT",

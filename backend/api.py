@@ -24,6 +24,10 @@ from routes.dashboard import router as dashboard_router
 from routes.follow_ups import router as follow_ups_router
 from routes.forms import router as forms_router
 from routes.records import router as records_router
+from routes.reports import router as reports_router
+from routes.referrals import router as referrals_router
+from routes.supplies import router as supplies_router
+from routes.sync import router as sync_router
 from routes.users import router as users_router
 from routes.visits import router as visits_router
 
@@ -62,6 +66,10 @@ app.include_router(forms_router, prefix="/api/v1", dependencies=signed_in, tags=
 app.include_router(visits_router, prefix="/api/v1", dependencies=signed_in, tags=["visits"])
 app.include_router(follow_ups_router, prefix="/api/v1", dependencies=signed_in, tags=["follow-ups"])
 app.include_router(dashboard_router, prefix="/api/v1", dependencies=signed_in, tags=["dashboard"])
+app.include_router(referrals_router, prefix="/api/v1", dependencies=signed_in, tags=["referrals"])
+app.include_router(supplies_router, prefix="/api/v1", dependencies=signed_in, tags=["supplies"])
+app.include_router(sync_router, prefix="/api/v1", dependencies=signed_in, tags=["sync"])
+app.include_router(reports_router, prefix="/api/v1", dependencies=signed_in, tags=["reports"])
 
 
 @app.exception_handler(ApiError)

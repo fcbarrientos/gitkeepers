@@ -23,6 +23,9 @@ class Dashboard(BaseModel):
     drafts: int
     households: int
     patients: int
+    referral_flags_open: int
+    low_stock: int
+    unsynced: int
     ai: AIStatus
 
 

@@ -4,7 +4,7 @@ import sqlite3
 import uuid
 from datetime import date
 
-from core import clock, follow_ups
+from core import clock, follow_ups, referrals
 from core.errors import ApiError
 from core.forms import get_form, validate_values
 from core.records import get_patient
@@ -113,6 +113,8 @@ def on_finalize(conn, visit_id: str, patient_id: str, form_type: str, visit_date
                                        form_type, user_id, source_visit_id=visit_id)
     if data.get("completes_follow_up_id"):
         follow_ups.complete_in_tx(conn, data["completes_follow_up_id"], patient_id, visit_id)
+    values = json.loads(conn.execute("SELECT values_json FROM visits WHERE id = ?", (visit_id,)).fetchone()[0])
+    referrals.flag_in_tx(conn, visit_id, patient_id, form_type, values)
     return follow_ups.get_follow_up(conn, created_id) if created_id else None
 
 

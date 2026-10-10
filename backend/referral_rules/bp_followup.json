@@ -1,0 +1,17 @@
+{
+  "form_type": "bp_followup",
+  "verification": "draft, pending professional review",
+  "rules": [
+    {"id": "bp-severe", "urgency": "urgent",
+     "when": {"any": [{"field": "bp_systolic", "op": ">=", "value": 180},
+                      {"field": "bp_diastolic", "op": ">=", "value": 110}]},
+     "reason": {"en": "Very high blood pressure (180/110 or higher)",
+                "fil": "Napakataas na presyon (180/110 o higit pa)"}},
+    {"id": "bp-chest-pain", "urgency": "urgent",
+     "when": {"field": "chest_pain", "op": "is_true"},
+     "reason": {"en": "Chest pain with high blood pressure", "fil": "Sakit ng dibdib na may mataas na presyon"}},
+    {"id": "bp-breathing", "urgency": "urgent",
+     "when": {"field": "shortness_of_breath", "op": "is_true"},
+     "reason": {"en": "Shortness of breath", "fil": "Hirap huminga"}}
+  ]
+}

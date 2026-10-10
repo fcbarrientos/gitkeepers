@@ -1,0 +1,13 @@
+{
+  "form_type": "child_growth",
+  "verification": "draft, pending professional review",
+  "rules": [
+    {"id": "child-muac", "urgency": "urgent",
+     "when": {"field": "muac_cm", "op": "<", "value": 11.5},
+     "reason": {"en": "Severe acute malnutrition (MUAC below 11.5 cm)",
+                "fil": "Malubhang malnutrisyon (MUAC na mas mababa sa 11.5 cm)"}},
+    {"id": "child-fever", "urgency": "routine",
+     "when": {"field": "temperature_c", "op": ">=", "value": 38.5},
+     "reason": {"en": "Child with fever of 38.5 °C or higher", "fil": "Batang may lagnat na 38.5 °C pataas"}}
+  ]
+}

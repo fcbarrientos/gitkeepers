@@ -1,0 +1,23 @@
+{
+  "form_type": "prenatal",
+  "verification": "draft, pending professional review",
+  "rules": [
+    {"id": "prenatal-high-bp", "urgency": "urgent",
+     "when": {"any": [{"field": "bp_systolic", "op": ">=", "value": 140},
+                      {"field": "bp_diastolic", "op": ">=", "value": 90}]},
+     "reason": {"en": "High blood pressure in pregnancy (140/90 or higher)",
+                "fil": "Mataas na presyon habang buntis (140/90 o higit pa)"}},
+    {"id": "prenatal-bleeding", "urgency": "urgent",
+     "when": {"field": "bleeding", "op": "is_true"},
+     "reason": {"en": "Vaginal bleeding in pregnancy", "fil": "Pagdurugo habang buntis"}},
+    {"id": "prenatal-fever", "urgency": "urgent",
+     "when": {"field": "temperature_c", "op": ">=", "value": 38.0},
+     "reason": {"en": "Fever of 38.0 °C or higher in pregnancy", "fil": "Lagnat na 38.0 °C pataas habang buntis"}},
+    {"id": "prenatal-abdominal-pain", "urgency": "urgent",
+     "when": {"field": "abdominal_pain", "op": "is_true"},
+     "reason": {"en": "Abdominal pain in pregnancy", "fil": "Pananakit ng tiyan habang buntis"}},
+    {"id": "prenatal-breathing", "urgency": "urgent",
+     "when": {"field": "shortness_of_breath", "op": "is_true"},
+     "reason": {"en": "Shortness of breath in pregnancy", "fil": "Hirap huminga habang buntis"}}
+  ]
+}

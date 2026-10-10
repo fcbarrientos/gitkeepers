@@ -41,6 +41,16 @@ class DashboardTests(VisitTestCase):
     def test_requires_sign_in(self):
         self.assertEqual(self.client.get("/api/v1/dashboard").status_code, 401)
 
+    def test_referral_supply_and_sync_counts(self):
+        self.create_visit(status="final", values={"bp_systolic": 190, "bp_diastolic": 100})
+        item = self.client.post("/api/v1/supplies", json={"name": "ORS", "unit": "sachets",
+                                                          "low_stock_threshold": 10, "target_level": 50},
+                                headers=self.headers).json()
+        self.assertTrue(item["low"])
+        summary = self.dashboard()
+        self.assertEqual((summary["referral_flags_open"], summary["low_stock"]), (1, 1))
+        self.assertGreater(summary["unsynced"], 0)
+
 
 class VisitListTests(VisitTestCase):
     def test_lists_visits_across_patients_newest_first_with_names(self):

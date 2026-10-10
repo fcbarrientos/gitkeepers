@@ -38,3 +38,6 @@
 ## 10/10/26 07:52
 - Added the web app (`frontend/`, React + Vite PWA, English/Filipino): sign-in and sign-up with admin approval, profile, accounts, households and patients, checkup forms with AI suggest → review → confirm, visit timelines, follow-ups, and a bento dashboard; referrals, supplies, reports and sync shown as "coming soon"
 - Backend: `GET /api/v1/dashboard`, `GET /api/v1/visits`, and serving `frontend/dist` at `/`
+
+## 10/10/26 09:01
+- Referrals (rule files + flags on finalize + slips), medicine and supply tracking, weekly/monthly reports with editable AI drafts from aggregated numbers, and manual sync (encrypted transfer file + signed RHU receipt); the four "Coming soon" tabs are now live

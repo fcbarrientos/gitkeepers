@@ -25,7 +25,7 @@ export const household: Household = {
 };
 
 export const dashboard: Dashboard = {
-  follow_ups: { overdue: 3, due: 1, upcoming: 4 }, visits_today: 2, drafts: 1, households: 12, patients: 40,
+  follow_ups: { overdue: 3, due: 1, upcoming: 4 }, visits_today: 2, drafts: 1, households: 12, patients: 40, referral_flags_open: 2, low_stock: 1, unsynced: 5,
   ai: { available: true, model: "Qwen3-4B-Q4_K_M.gguf" },
 };
 

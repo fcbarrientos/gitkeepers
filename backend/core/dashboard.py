@@ -1,9 +1,10 @@
 """Counts for the home dashboard. Follow-up states use the same rules as the follow-up list."""
 import sqlite3
 
-from core import clock
+from core import clock, sync_state
 from core.assist import ai_status
 from core.follow_ups import STATE_FILTERS
+from core.supplies import list_items
 
 
 def _count(conn: sqlite3.Connection, sql: str, *params) -> int:
@@ -21,5 +22,8 @@ def summary(conn: sqlite3.Connection) -> dict:
         "drafts": _count(conn, "SELECT count(*) FROM visits WHERE status = 'draft'"),
         "households": _count(conn, "SELECT count(*) FROM households"),
         "patients": _count(conn, "SELECT count(*) FROM patients"),
+        "referral_flags_open": _count(conn, "SELECT count(*) FROM referral_flags WHERE status = 'open'"),
+        "low_stock": sum(1 for item in list_items(conn, include_inactive=False) if item["low"]),
+        "unsynced": sync_state.unsynced_count(conn),
         "ai": ai_status(),
     }

@@ -14,3 +14,9 @@ class FakeLLM:
         if isinstance(self.reply, Exception):
             raise self.reply
         return self.reply(messages) if callable(self.reply) else self.reply
+
+    def generate(self, prompt, max_tokens=256):
+        self.calls.append(prompt)
+        if isinstance(self.reply, Exception):
+            raise self.reply
+        return self.reply(prompt) if callable(self.reply) else self.reply

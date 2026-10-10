@@ -9,16 +9,19 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["icon.svg"],
+      includeAssets: ["brand/ruport-mark.png", "brand/ruport-icon-192.png", "brand/ruport-icon-512.png"],
       manifest: {
-        name: "GitKeepers",
-        short_name: "GitKeepers",
-        description: "Offline health records for barangay health workers",
-        theme_color: "#1d3fbf",
+        name: "RuPort AI",
+        short_name: "RuPort AI",
+        description: "Offline-first health records for medical volunteers in rural communities",
+        theme_color: "#071b35",
         background_color: "#ffffff",
         display: "standalone",
         start_url: "/",
-        icons: [{ src: "icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }],
+        icons: [
+          { src: "brand/ruport-icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "brand/ruport-icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+        ],
       },
       workbox: {
         // App shell only: API responses always come from the local backend.

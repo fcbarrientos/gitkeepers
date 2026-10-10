@@ -122,6 +122,25 @@ confirmed plus `ai_accepted_fields`, and each saved field records its source:
 `manual`, `ai_accepted` or `ai_edited`. Validation errors on visit values come back as
 `422 { "detail": ["<field>: <problem>", ...] }`.
 
+Referrals, supplies, reports and sync:
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/api/v1/referral-rules` | Referral rules per form (`backend/referral_rules/*.json`, draft pending professional review). Finalizing a visit records a flag for every rule it meets; the AI is never involved |
+| `GET` | `/api/v1/referral-flags?status=open&patient_id=&visit_id=` | Flags; `POST /referral-flags/{id}/dismiss` closes one |
+| `POST` / `GET` | `/api/v1/referrals`, `/api/v1/referrals/{id}` | Create (optionally from a flag) and read referral slips |
+| `GET` / `POST` | `/api/v1/supplies`, `/api/v1/supplies/{id}/movements` | Items with on-hand stock (sum of movements) and low-stock flag; record received / distributed / adjusted |
+| `GET` | `/api/v1/supplies/request-list` | Low items with the quantity needed to reach the target |
+| `GET` | `/api/v1/reports/summary?period=week\|month&date=` | Counts for the period and the previous one, plus unsynced records |
+| `POST` | `/api/v1/reports/drafts` / `/reports/drafts/manual` | AI draft from aggregated numbers only (503 when the model is off) or a hand-written draft; `PATCH /reports/drafts/{id}` edits or approves |
+| `GET` | `/api/v1/sync/status` | Pending / awaiting receipt / synced counts per record type |
+| `PUT` | `/api/v1/sync/settings` | Admin: RHU passphrase (12+ characters) |
+| `POST` | `/api/v1/sync/bundles` | Admin: encrypted, de-identified transfer file of all pending records |
+| `POST` | `/api/v1/sync/receipts` | Admin: RHU receipt (signed with the passphrase); only then are records marked synced |
+
+At the RHU, `RHU_PASSPHRASE=... python -m scripts.rhu_receipt transfer.json` checks a transfer
+file and writes the receipt to import back on the device.
+
 Use this same resource-oriented, versioned contract for future visits, referrals,
 inventory, reporting, and sync APIs: validated request/response schemas, bounded
 pagination, feature-specific routers, service-layer database operations, and

@@ -4,6 +4,7 @@ import { api, ApiError } from "../api/client";
 import type { AIStatus, FollowUp, FormDefinition, PatientSummary, Values, Visit, VisitInput, VisitStatus } from "../api/types";
 import { useApi } from "../api/useApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { FlagBanner } from "../components/FlagBanner";
 import { LoadError, Loading } from "../components/Status";
 import { errorText, useToast } from "../components/Toast";
 import { acceptedFrom, checkupReducer, emptyCheckup, savedFields } from "../forms/checkup";
@@ -218,6 +219,7 @@ function CheckupEditor({ visit, patient, form, openFollowUps, ai, onFinalized }:
         {visit && <span className={`badge badge-${visit.status}`}>{t(`visit.${visit.status}`)}</span>}
       </div>
       {readOnly && <p className="notice">{t("checkup.readOnly")}</p>}
+      {visit?.status === "final" && <FlagBanner visitId={visit.id} />}
       {conflict && (
         <div className="notice notice-error" role="alert">
           <p>{t("checkup.conflict")}</p>

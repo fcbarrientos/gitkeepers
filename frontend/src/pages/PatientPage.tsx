@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import { useApi } from "../api/useApi";
+import { FlagBanner } from "../components/FlagBanner";
 import { LoadError, Loading } from "../components/Status";
 import { pick, useI18n } from "../i18n/i18n";
 
@@ -38,6 +39,7 @@ export function PatientPage() {
           <h1>{p.full_name}</h1>
           <p className="muted">{details}</p>
           <Link to={`/households/${p.household_id}`}>{t("patients.household")}</Link>
+          {" · "}<Link to={`/referrals/new?patient=${encodeURIComponent(p.id)}`}>{t("referrals.refer")}</Link>
         </div>
         <form className="inline-form" style={{ width: "auto" }}
           onSubmit={(e) => { e.preventDefault(); navigate(`/patients/${p.id}/visits/new?form=${encodeURIComponent(start)}`); }}>
@@ -49,6 +51,7 @@ export function PatientPage() {
           <button type="submit" className="btn btn-primary" disabled={!start}>{t("patients.startCheckup")}</button>
         </form>
       </div>
+      <FlagBanner patientId={p.id} />
       <div className="two-col">
         <section className="card">
           <div className="card-head">
