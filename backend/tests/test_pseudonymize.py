@@ -26,6 +26,11 @@ class PseudonymizationTests(unittest.TestCase):
         restored = self.psn.depseudonymize_text(anon)
         self.assertEqual(restored, note)
 
+    def test_capitalized_name_marker_at_sentence_start_is_masked(self):
+        masked = self.psn.pseudonymize_text("Si Maria ay buntis. Kay Jose ang bahay.")
+        self.assertNotIn("Maria", masked)
+        self.assertNotIn("Jose", masked)
+
     def test_philippine_phone_and_philhealth(self):
         note = "Contact: 0917-123-4567, PhilHealth: 12-345678901-2. May lagnat po."
         anon = self.psn.pseudonymize_text(note)

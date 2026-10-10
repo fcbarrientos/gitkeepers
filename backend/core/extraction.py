@@ -11,7 +11,8 @@ from core.config import MIGRATIONS_DIR
 
 PROMPTS_DIR = MIGRATIONS_DIR.parent / "prompts"
 
-# field -> (json type, (min, max) sanity range or None).
+# field -> (json type, extra). extra is the (min, max) sanity range for numbers, None for
+# booleans, or the tuple of allowed options for "choice"/"choices".
 # null always means "the note does not mention this".
 PRENATAL_FIELDS = {
     "weeks_pregnant": ("integer", (1, 45)),
@@ -40,18 +41,34 @@ def load_json(name: str):
     return json.loads((PROMPTS_DIR / name).read_text(encoding="utf-8"))
 
 
+def _json_schema(ftype: str, extra) -> dict:
+    if ftype == "choice":
+        return {"type": ["string", "null"], "enum": [*extra, None]}
+    if ftype == "choices":
+        return {"type": ["array", "null"], "items": {"type": "string", "enum": list(extra)}}
+    return {"type": [ftype, "null"]}
+
+
 def schema_for(fields: dict) -> dict:
     return {
         "type": "object",
-        "properties": {k: {"type": [t, "null"]} for k, (t, _) in fields.items()},
+        "properties": {k: _json_schema(t, extra) for k, (t, extra) in fields.items()},
         "additionalProperties": False,
     }
 
 
-def build_messages(note: str, fields: dict = PRENATAL_FIELDS, fewshot=None, glossary=None) -> list:
-    fewshot = load_json("prenatal_fewshot.json") if fewshot is None else fewshot
+def build_messages(note: str, fields: dict = PRENATAL_FIELDS, fewshot=None, glossary=None,
+                   fewshot_file: str = "prenatal_fewshot.json") -> list:
+    fewshot = load_json(fewshot_file) if fewshot is None else fewshot
     glossary = load_json("glossary_fil.json") if glossary is None else glossary
     gloss = "\n".join(f"- {k} = {v}" for k, v in glossary.items())
+    options = "".join(
+        f"- {name}: one of {list(extra)}\n" if ftype == "choice" else f"- {name}: list of any of {list(extra)}\n"
+        for name, (ftype, extra) in fields.items()
+        if ftype in ("choice", "choices")
+    )
+    if options:
+        options = "Fields with fixed options (copy the spelling exactly):\n" + options
     system = (
         "You extract structured clinical data from a health worker's visit note. "
         "The note may be in Filipino, Taglish or English.\n"
@@ -62,12 +79,14 @@ def build_messages(note: str, fields: dict = PRENATAL_FIELDS, fewshot=None, glos
         "- Gestational age like '28 weeks' or '30 linggo' -> weeks_pregnant (as integer digits).\n"
         "- Blood pressure like '140/90' or '140 over 90' -> bp_systolic: 140, bp_diastolic: 90.\n"
         "- Temperature like '38.5 temp' or '37.8 C' -> temperature_c: 38.5 (and fever: true if >= 37.8).\n"
+        f"{options}"
         f"Glossary (Filipino to English):\n{gloss}\n"
         "Output ONLY a valid compact JSON object."
     )
     messages = [{"role": "system", "content": system}]
     for ex in fewshot:
-        answer = {k: v for k, v in ex["fields"].items() if k in fields and v is not None}
+        # Schema order: the JSON grammar rejects keys out of order, so teach the model that order.
+        answer = {k: ex["fields"][k] for k in fields if ex["fields"].get(k) is not None}
         messages.append({"role": "user", "content": f"{ex['note']} /no_think"})
         messages.append({"role": "assistant", "content": json.dumps(answer, ensure_ascii=False)})
     messages.append({"role": "user", "content": f"{note} /no_think"})
@@ -78,12 +97,31 @@ def strip_think(text: str) -> str:
     return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
 
 
+def _canonical(value, options):
+    """Match an option ignoring case, spaces, '-' and '_' ('penta 2' -> 'Penta2')."""
+    if not isinstance(value, str):
+        return None
+    wanted = re.sub(r"[\s_-]", "", value).lower()
+    return next((o for o in options if re.sub(r"[\s_-]", "", o).lower() == wanted), None)
+
+
 def _check(value, ftype, rng):
     """Return (clean_value, problem_or_None)."""
     if value is None:
         return None, None
     if ftype == "boolean":
         return (value, None) if isinstance(value, bool) else (None, f"expected true/false, got {value!r}")
+    if ftype == "choice":
+        option = _canonical(value, rng)
+        return (option, None) if option else (None, f"expected one of {list(rng)}, got {value!r}")
+    if ftype == "choices":
+        if not isinstance(value, list):
+            return None, f"expected a list from {list(rng)}, got {value!r}"
+        options = [_canonical(v, rng) for v in value]
+        bad = [v for v, o in zip(value, options) if o is None]
+        if bad:
+            return None, f"{bad!r} not in {list(rng)}"
+        return (list(dict.fromkeys(options)) or None), None  # [] means nothing recorded
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None, f"expected a number, got {value!r}"
     if ftype == "integer":
@@ -95,6 +133,9 @@ def _check(value, ftype, rng):
     if rng and not (rng[0] <= value <= rng[1]):
         return None, f"{value} is outside the plausible range {rng}"
     return value, None
+
+
+check_value = _check  # public name for core.forms
 
 
 def parse_and_validate(raw: str, fields: dict = PRENATAL_FIELDS) -> dict:
@@ -124,8 +165,8 @@ def parse_and_validate(raw: str, fields: dict = PRENATAL_FIELDS) -> dict:
 
 
 def extract(llm, note: str, fields: dict = PRENATAL_FIELDS, fewshot=None, glossary=None,
-            max_tokens: int = 512) -> dict:
+            max_tokens: int = 512, fewshot_file: str = "prenatal_fewshot.json") -> dict:
     """llm must provide chat_json(messages, schema, max_tokens) -> str."""
-    messages = build_messages(note, fields, fewshot, glossary)
+    messages = build_messages(note, fields, fewshot, glossary, fewshot_file)
     raw = llm.chat_json(messages, schema_for(fields), max_tokens)
     return parse_and_validate(raw, fields)

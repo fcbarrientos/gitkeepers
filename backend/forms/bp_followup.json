@@ -1,0 +1,25 @@
+{
+  "form_type": "bp_followup",
+  "title": {"en": "Blood pressure follow-up", "fil": "Follow-up sa presyon ng dugo"},
+  "verification": "pending DOH review",
+  "default_follow_up_days": 30,
+  "fields": [
+    {"name": "bp_systolic", "type": "integer", "min": 50, "max": 260, "required": true, "ai": true,
+     "label": {"en": "BP systolic (mmHg)", "fil": "BP systolic (mmHg)"}},
+    {"name": "bp_diastolic", "type": "integer", "min": 30, "max": 160, "required": true, "ai": true,
+     "label": {"en": "BP diastolic (mmHg)", "fil": "BP diastolic (mmHg)"}},
+    {"name": "pulse_bpm", "type": "integer", "min": 30, "max": 220, "ai": true,
+     "label": {"en": "Pulse (bpm)", "fil": "Pulso (bpm)"}},
+    {"name": "weight_kg", "type": "number", "min": 25, "max": 250, "ai": true,
+     "label": {"en": "Weight (kg)", "fil": "Timbang (kg)"}},
+    {"name": "on_maintenance_meds", "type": "boolean", "ai": true,
+     "label": {"en": "On maintenance medicine", "fil": "May maintenance na gamot"}},
+    {"name": "took_meds_today", "type": "boolean", "ai": true,
+     "label": {"en": "Took medicine today", "fil": "Nakainom ng gamot ngayon"}},
+    {"name": "headache", "type": "boolean", "ai": true, "label": {"en": "Headache", "fil": "Sakit ng ulo"}},
+    {"name": "dizziness", "type": "boolean", "ai": true, "label": {"en": "Dizziness", "fil": "Pagkahilo"}},
+    {"name": "chest_pain", "type": "boolean", "ai": true, "label": {"en": "Chest pain", "fil": "Sakit ng dibdib"}},
+    {"name": "shortness_of_breath", "type": "boolean", "ai": true, "label": {"en": "Shortness of breath", "fil": "Hirap huminga"}},
+    {"name": "blurred_vision", "type": "boolean", "ai": true, "label": {"en": "Blurred vision", "fil": "Malabong paningin"}}
+  ]
+}

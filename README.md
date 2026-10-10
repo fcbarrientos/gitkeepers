@@ -48,6 +48,25 @@ bindings from that OpenAPI schema. New feature endpoints live under `/api/v1`, i
 the versioned chat and conversation endpoints. The original unversioned chat and
 conversation paths remain available for existing clients.
 
+Authentication and accounts (accounts live on the device, so login works offline):
+
+| Method | Endpoint | Who | Purpose |
+|---|---|---|---|
+| `POST` | `/api/v1/auth/signup` | anyone | Create an account. The first account on a device becomes an active admin; later ones are pending volunteers until an admin approves them |
+| `POST` | `/api/v1/auth/login` | anyone | `{ "login": "<username or email>", "password": "..." }` → `{ token, expires_at, user }` |
+| `POST` | `/api/v1/auth/logout` | signed in | Revoke the current session |
+| `GET` | `/api/v1/auth/me` | signed in | The current user |
+| `PATCH` | `/api/v1/me` | signed in | Update own `full_name` / `email` |
+| `POST` | `/api/v1/me/password` | signed in | `{ current_password, new_password }`; signs out other sessions |
+| `GET` | `/api/v1/users?status=&role=&q=&limit=&offset=` | admin | List accounts, pending first |
+| `GET` | `/api/v1/users/{user_id}` | admin | Get one account |
+| `PATCH` | `/api/v1/users/{user_id}` | admin | `{ "status": "active" \| "disabled", "role": "admin" \| "volunteer" }` (approve = `active`) |
+| `POST` | `/api/v1/users/{user_id}/password` | admin | Offline password reset; signs the user out everywhere |
+
+Every other `/api/v1` endpoint requires `Authorization: Bearer <token>` from login.
+Sessions last 7 days and are extended while in use. Five wrong passwords lock an account
+for 5 minutes. Errors use `{ "detail": "<message>" }`, which is safe to show to users.
+
 Household and patient records:
 
 | Method | Endpoint | Purpose |
@@ -81,6 +100,28 @@ Search matches household location and member names, or patient names and contact
 numbers using token-prefix full-text search. Limits are capped at 100. Every endpoint
 other than `/health` uses the configured `X-API-Token` check when `API_TOKEN` is set.
 
+Checkup forms, AI-assisted entry, visits and follow-ups:
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/api/v1/forms` / `/api/v1/forms/{form_type}` | Form definitions (`prenatal`, `child_growth`, `bp_followup`): fields, types, ranges, en/fil labels, required and AI flags. Drafts pending DOH review, defined in `backend/forms/*.json` |
+| `GET` | `/api/v1/ai/status` | `{ available, model }`: whether the local model file is present |
+| `POST` | `/api/v1/patients/{id}/suggestions` | `{ form_type, note }` → `{ suggestion_id, values, missing, problems }`. The note is pseudonymized before it reaches the model. `503` means fill the form manually |
+| `POST` | `/api/v1/patients/{id}/visits` | Record a visit: `{ form_type, visit_date, values, note, status: draft\|final, suggestion_id, ai_accepted_fields, follow_up: { due_date, reason }, completes_follow_up_id }` |
+| `GET` | `/api/v1/patients/{id}/visits?form_type=` | Visit timeline, newest first |
+| `GET` / `PATCH` | `/api/v1/visits/{id}` | Get a visit; edit or finalize a draft (final visits are read-only) |
+| `GET` | `/api/v1/follow-ups?state=overdue\|due\|upcoming\|completed\|cancelled&patient_id=&q=` | Follow-up list, by due date |
+| `POST` | `/api/v1/patients/{id}/follow-ups` | Schedule a follow-up |
+| `PATCH` | `/api/v1/follow-ups/{id}` | Reschedule or cancel |
+| `POST` | `/api/v1/follow-ups/{id}/complete` | Mark completed, optionally with `{ visit_id }` |
+| `GET` | `/api/v1/visits?date=&status=draft\|final` | Visits across all patients, newest first, with `patient_name` |
+| `GET` | `/api/v1/dashboard` | Counts for the home screen: follow-ups overdue/due/upcoming, visits today, drafts, households, patients, AI status |
+
+AI suggestions are never saved on their own. The client submits the values the worker
+confirmed plus `ai_accepted_fields`, and each saved field records its source:
+`manual`, `ai_accepted` or `ai_edited`. Validation errors on visit values come back as
+`422 { "detail": ["<field>: <problem>", ...] }`.
+
 Use this same resource-oriented, versioned contract for future visits, referrals,
 inventory, reporting, and sync APIs: validated request/response schemas, bounded
 pagination, feature-specific routers, service-layer database operations, and
@@ -93,9 +134,35 @@ pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-c
 
 ---
 
+## Frontend (web app)
+
+The web app lives in `frontend/` (React + TypeScript + Vite, installable as a PWA). In
+production the backend serves the built app on its own port, so health workers open
+`http://127.0.0.1:8765/` on the laptop that runs it.
+
+Current limits:
+- `run.py` listens on `127.0.0.1` only, so phones on the same Wi-Fi cannot reach it yet. Opening
+  it to the network would also need HTTPS for the PWA (offline shell, install) to work on phones.
+- Leave `API_TOKEN` unset when using the built-in web app: the app does not send `X-API-Token`,
+  so with a token set nobody can sign in. The token is for a desktop shell that calls the API itself.
+
+```bash
+cd frontend
+npm install
+npm run build        # writes frontend/dist, which the backend serves at /
+npm run dev          # development: http://localhost:5173, proxies /api to 127.0.0.1:8765
+npm test             # unit and component tests (Vitest)
+```
+
+The UI has English and Filipino (toggle in the header). Data never leaves the backend's
+SQLite database; the service worker caches only the app shell.
+
+---
+
 ## Running Evaluations & Tests
 
 ### Run Unit Tests
+Tests need `httpx` (listed in `requirements.txt`); `llama-cpp-python` is not required to run them.
 ```bash
 python -m unittest discover -s tests -v
 ```
@@ -103,7 +170,8 @@ python -m unittest discover -s tests -v
 ### Run Clinical Model Evaluation Harness
 To benchmark model accuracy, latency, and parse reliability on the Taglish/Filipino clinical dataset:
 ```bash
-python -m evals.run_eval Qwen3-4B-Q4_K_M.gguf
+python -m evals.run_eval Qwen3-4B-Q4_K_M.gguf                                   # original 19-field prenatal eval
+python -m evals.run_eval Qwen3-4B-Q4_K_M.gguf --form child_growth --pseudonymize  # a form's AI fields, masked notes
 ```
 
 ---
@@ -123,6 +191,11 @@ backend/
     pseudonymize.py       Offline PII detection & deterministic pseudonymization
     sync.py               AES-256-GCM encrypted sync bundles & RHU resolution
     i18n.py               Bilingual localization manager (Filipino & English)
+    forms.py              Form loading and value validation
+    assist.py             Shared local model, note masking, AI suggestions
+    visits.py             Visits: draft/final lifecycle and AI provenance
+    follow_ups.py         Follow-up scheduling and due/overdue state
+  forms/                  Checkup form definitions (JSON, pending DOH review)
   evals/
     samples.jsonl         25 realistic Taglish/Filipino clinical evaluation cases
     scoring.py            Field-by-field accuracy and exact-match evaluation logic
@@ -139,6 +212,12 @@ backend/
   tests/
     test_extraction.py    Unit tests for extraction, i18n, and prompts
     test_pseudonymize.py  Unit tests for PII masking, AES-GCM sync, and RHU ingestion
+frontend/
+  src/api/                Fetch wrapper and endpoint types
+  src/auth/               Session token, sign-in state, route guards
+  src/forms/              Form renderer and AI suggestion review state
+  src/pages/              One file per screen
+  src/i18n/               en.json / fil.json and the language toggle
 ```
 
 ---
@@ -151,3 +230,4 @@ backend/
 | `MODEL_PATH` | `models/Qwen3-4B-Q4_K_M.gguf` | Path to GGUF weights (falls back to `MockLLM` if missing) |
 | `ALLOWED_ORIGINS` | `http://localhost:5173,...` | Allowed CORS origins for desktop shell / web UI |
 | `API_TOKEN` | `None` | If set, requests must include `X-API-Token` header |
+| `FRONTEND_DIST` | `frontend/dist` | Built web app the backend serves at `/` (skipped when missing) |

@@ -6,6 +6,10 @@ def values_match(expected, got, tol: float = 0.05) -> bool:
         return expected is None and got is None
     if isinstance(expected, bool) or isinstance(got, bool):
         return expected is got
+    if isinstance(expected, list) or isinstance(got, list):  # "choices": order doesn't matter
+        return isinstance(expected, list) and isinstance(got, list) and set(expected) == set(got)
+    if isinstance(expected, str) or isinstance(got, str):    # "choice"
+        return expected == got
     return abs(float(expected) - float(got)) <= tol
 
 

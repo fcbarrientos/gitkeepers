@@ -17,6 +17,9 @@ MODELS_DIR = DATA_DIR / "models"
 _BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
 MIGRATIONS_DIR = _BASE / "migrations"
 
+# The built web app (npm run build in frontend/). Served at / when present.
+FRONTEND_DIST = Path(os.environ.get("FRONTEND_DIST") or _BASE.parent / "frontend" / "dist")
+
 # Comma-separated origins the desktop UI calls from. Ask the frontend team for theirs.
 ALLOWED_ORIGINS = [o.strip() for o in os.environ.get(
     "ALLOWED_ORIGINS",
@@ -26,6 +29,9 @@ ALLOWED_ORIGINS = [o.strip() for o in os.environ.get(
 # If set, every request (except /health) must send header X-API-Token with this value.
 # The desktop shell should generate a random one at launch and pass it in.
 API_TOKEN = os.environ.get("API_TOKEN") or None
+
+# How long a write waits for another writer before the request fails with 503.
+DB_BUSY_TIMEOUT_SECONDS = 5.0
 
 
 def ensure_dirs() -> None:

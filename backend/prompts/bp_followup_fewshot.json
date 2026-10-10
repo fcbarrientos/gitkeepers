@@ -1,0 +1,18 @@
+[
+  {"note": "BP niya ngayon 150/95, pulso 88. Umiinom ng maintenance pero hindi nakainom kaninang umaga.",
+   "fields": {"bp_systolic": 150, "bp_diastolic": 95, "pulse_bpm": 88, "on_maintenance_meds": true, "took_meds_today": false}},
+  {"note": "130 over 85 ang presyon. Walang sakit ng ulo, walang hilo.",
+   "fields": {"bp_systolic": 130, "bp_diastolic": 85, "headache": false, "dizziness": false}},
+  {"note": "Mang Pedro, 160/100, sumasakit ang ulo at malabo ang paningin.",
+   "fields": {"bp_systolic": 160, "bp_diastolic": 100, "headache": true, "blurred_vision": true}},
+  {"note": "Weight 72 kg, BP 128/82, nakainom na ng gamot kanina.",
+   "fields": {"weight_kg": 72, "bp_systolic": 128, "bp_diastolic": 82, "took_meds_today": true}},
+  {"note": "Hindi umiinom ng maintenance. BP 145/92. Kinakapos ng hininga pag naglalakad.",
+   "fields": {"on_maintenance_meds": false, "bp_systolic": 145, "bp_diastolic": 92, "shortness_of_breath": true}},
+  {"note": "Nag-follow up lang para sa BP check.",
+   "fields": {}},
+  {"note": "BP 118/76, pulse 72. No chest pain, no dizziness.",
+   "fields": {"bp_systolic": 118, "bp_diastolic": 76, "pulse_bpm": 72, "chest_pain": false, "dizziness": false}},
+  {"note": "May paninikip ng dibdib kagabi. 170/105 ngayon.",
+   "fields": {"chest_pain": true, "bp_systolic": 170, "bp_diastolic": 105}}
+]

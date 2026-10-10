@@ -1,16 +1,31 @@
 """Local HTTP API. Run: uvicorn api:app --reload   then open http://127.0.0.1:8000/docs"""
 import secrets
-from threading import Lock
+import sqlite3
+from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi.encoders import jsonable_encoder
+from fastapi.exception_handlers import http_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from core import config
-from core.inference import LLM, MockLLM, LlamaCppLLM
+from core.assist import MODEL_LOCK, AIUnavailable, load_model
+from core.auth import current_user
+from core.errors import ApiError
+from core.inference import LLM, MockLLM
 from core.storage import connect, get_db, migrate
+from routes.auth import router as auth_router
+from routes.dashboard import router as dashboard_router
+from routes.follow_ups import router as follow_ups_router
+from routes.forms import router as forms_router
 from routes.records import router as records_router
+from routes.users import router as users_router
+from routes.visits import router as visits_router
 
 
 
@@ -20,31 +35,94 @@ def require_token(x_api_token: str | None = Header(default=None)):
         raise HTTPException(401, "invalid or missing X-API-Token")
 
 
-app = FastAPI(title="GitKeepers Local API", version="1.0.0")
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # Migrate on startup, not on import, so tests can point config at a temp folder first.
+    db = connect()
+    try:
+        migrate(db)
+    finally:
+        db.close()
+    yield
+
+
+app = FastAPI(title="GitKeepers Local API", version="1.0.0", lifespan=lifespan)
 auth = [Depends(require_token)]
+signed_in = [*auth, Depends(current_user)]  # shell token + an active user session
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.ALLOWED_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-db = connect()
-try:
-    migrate(db)
-finally:
-    db.close()
-model_path = config.MODELS_DIR / "Qwen3-4B-Q4_K_M.gguf"
-llm: LLM | None = None
-llm_lock = Lock()
-app.include_router(records_router, prefix="/api/v1", dependencies=auth, tags=["records"])
+app.include_router(records_router, prefix="/api/v1", dependencies=signed_in, tags=["records"])
+app.include_router(auth_router, prefix="/api/v1", dependencies=auth, tags=["auth"])
+app.include_router(users_router, prefix="/api/v1", dependencies=auth, tags=["users"])
+app.include_router(forms_router, prefix="/api/v1", dependencies=signed_in, tags=["forms"])
+app.include_router(visits_router, prefix="/api/v1", dependencies=signed_in, tags=["visits"])
+app.include_router(follow_ups_router, prefix="/api/v1", dependencies=signed_in, tags=["follow-ups"])
+app.include_router(dashboard_router, prefix="/api/v1", dependencies=signed_in, tags=["dashboard"])
+
+
+@app.exception_handler(ApiError)
+async def api_error_handler(_request, exc: ApiError):
+    headers = {"WWW-Authenticate": "Bearer"} if exc.status_code == 401 else None
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail}, headers=headers)
+
+
+@app.exception_handler(sqlite3.OperationalError)
+async def database_busy_handler(_request, exc: sqlite3.OperationalError):
+    if "locked" not in str(exc) and "busy" not in str(exc):
+        raise exc
+    return JSONResponse(status_code=503, content={"detail": "Database is busy, please try again"})
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(_request, exc: RequestValidationError):
+    # Drop the echoed "input" from request-body errors: it can contain the submitted
+    # password, and frontends may log or display these bodies.
+    errors = [
+        {key: value for key, value in error.items() if key != "input"}
+        if error.get("loc", ())[:1] == ("body",) else error
+        for error in exc.errors()
+    ]
+    return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
+
+
+RESERVED_PREFIXES = {"api", "docs", "redoc", "openapi.json", "health"}
+
+
+def _frontend_file(path: str) -> Path | None:
+    """The built web app's file for a GET that matched no API route, or None."""
+    dist = config.FRONTEND_DIST
+    index = dist / "index.html"
+    relative = path.lstrip("/")
+    if relative.split("/", 1)[0] in RESERVED_PREFIXES or not index.is_file():
+        return None
+    candidate = (dist / relative).resolve()
+    if relative and candidate.is_file() and candidate.is_relative_to(dist.resolve()):
+        return candidate
+    if "." in relative.rsplit("/", 1)[-1]:
+        return None  # a missing asset stays a 404 instead of returning the page
+    return index  # a client-side route such as /patients/5
+
+
+@app.exception_handler(StarletteHTTPException)
+async def frontend_fallback(request, exc: StarletteHTTPException):
+    file = None
+    if exc.status_code == 404 and request.method in ("GET", "HEAD"):
+        file = _frontend_file(request.url.path)
+    if file is None:
+        return await http_exception_handler(request, exc)
+    return FileResponse(file)
 
 
 def get_llm() -> LLM:
-    global llm
-    with llm_lock:
-        if llm is None:
-            llm = LlamaCppLLM(model_path=str(model_path)) if model_path.is_file() else MockLLM()
-        return llm
+    """The shared local model for chat, or the mock when it's unavailable."""
+    try:
+        return load_model()
+    except AIUnavailable:
+        return MockLLM()
 
 
 class ChatRequest(BaseModel):
@@ -127,7 +205,7 @@ def _message_page(cid: int, limit: int | None, offset: int = 0) -> dict:
 @app.get(
     "/api/v1/conversations",
     response_model=ConversationPage,
-    dependencies=auth,
+    dependencies=signed_in,
     tags=["conversations"],
 )
 def list_conversations(
@@ -137,7 +215,7 @@ def list_conversations(
     return _conversation_page(limit, offset)
 
 
-@app.get("/conversations", dependencies=auth, include_in_schema=False)
+@app.get("/conversations", dependencies=signed_in, include_in_schema=False)
 def list_conversations_legacy():
     return _conversation_page(None)["items"]
 
@@ -145,7 +223,7 @@ def list_conversations_legacy():
 @app.get(
     "/api/v1/conversations/{cid}/messages",
     response_model=MessagePage,
-    dependencies=auth,
+    dependencies=signed_in,
     tags=["conversations"],
 )
 def get_messages(
@@ -156,13 +234,13 @@ def get_messages(
     return _message_page(cid, limit, offset)
 
 
-@app.get("/conversations/{cid}/messages", dependencies=auth, include_in_schema=False)
+@app.get("/conversations/{cid}/messages", dependencies=signed_in, include_in_schema=False)
 def get_messages_legacy(cid: int):
     return _message_page(cid, None)["items"]
 
 
-@app.post("/api/v1/chat", dependencies=auth, tags=["chat"])
-@app.post("/chat", dependencies=auth, include_in_schema=False)
+@app.post("/api/v1/chat", dependencies=signed_in, tags=["chat"])
+@app.post("/chat", dependencies=signed_in, include_in_schema=False)
 def chat(req: ChatRequest):
     db = connect()
     try:
@@ -180,13 +258,15 @@ def chat(req: ChatRequest):
 
     def events():
         parts = []
-        for piece in get_llm().stream(req.message):
-            parts.append(piece)
-            yield f"data: {piece}\n\n"
+        with MODEL_LOCK:
+            for piece in get_llm().stream(req.message):
+                parts.append(piece)
+                yield f"data: {piece}\n\n"
         db2 = connect()
         try:
-            db2.execute("INSERT INTO messages (conversation_id, role, content) VALUES (?,?,?)",
-                        (cid, "assistant", "".join(parts)))
+            with db2:
+                db2.execute("INSERT INTO messages (conversation_id, role, content) VALUES (?,?,?)",
+                            (cid, "assistant", "".join(parts)))
         finally:
             db2.close()
         yield "event: done\ndata: " + str(cid) + "\n\n"

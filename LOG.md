@@ -27,3 +27,14 @@
   - Supports de-identified transit over USB/mesh/internet and full identity restoration at the RHU/Hospital server
   - Supports anonymous extraction for municipal DOH epidemiological reporting
 - Created comprehensive test suite (`tests/test_pseudonymize.py`) with all 26 backend unit tests passing
+
+## 10/10/26 05:31
+- Prenatal extraction baseline before the visits/forms work (Qwen3-4B-Q4_K_M, 25 samples, CPU-only):
+  - raw notes: fields 81%, exact 20%, parse_fail 0%, avg 42.0s
+  - pseudonymized notes (`--pseudonymize`): fields 81%, exact 16%, parse_fail 0%, avg 38.9s
+  - Common misses: values stated in the note left empty (e.g. BP "170/100" -> null) and unmentioned symptoms set to false
+- Added `--pseudonymize` to `evals/run_eval.py` so evals see the same masked notes as production
+
+## 10/10/26 07:52
+- Added the web app (`frontend/`, React + Vite PWA, English/Filipino): sign-in and sign-up with admin approval, profile, accounts, households and patients, checkup forms with AI suggest → review → confirm, visit timelines, follow-ups, and a bento dashboard; referrals, supplies, reports and sync shown as "coming soon"
+- Backend: `GET /api/v1/dashboard`, `GET /api/v1/visits`, and serving `frontend/dist` at `/`

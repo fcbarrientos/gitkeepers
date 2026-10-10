@@ -1,0 +1,18 @@
+[
+  {"note": "Timbang ni baby 7.5 kilo, haba 68 cm. Binigyan ng Penta 2 at OPV 2 ngayon. Puro gatas ng ina pa rin.",
+   "fields": {"weight_kg": 7.5, "length_height_cm": 68, "vaccines_given": ["Penta2", "OPV2"], "breastfeeding": "exclusive"}},
+  {"note": "9 months na si bunso, MMR 1 ang bakuna ngayon at binigyan ng Vitamin A. 8.1 kg.",
+   "fields": {"vaccines_given": ["MMR1"], "vitamin_a_given": true, "weight_kg": 8.1}},
+  {"note": "May lagnat si baby, 38.2 ang temp, inuubo pero walang pagtatae.",
+   "fields": {"fever": true, "temperature_c": 38.2, "cough": true, "diarrhea": false}},
+  {"note": "Newborn checkup. BCG at Hepa B naibigay. 3.1 kilos.",
+   "fields": {"vaccines_given": ["BCG", "HepB"], "weight_kg": 3.1}},
+  {"note": "MUAC 12.8 cm, timbang 9.4 kg. Hindi na nagpapasuso, formula na.",
+   "fields": {"muac_cm": 12.8, "weight_kg": 9.4, "breastfeeding": "none"}},
+  {"note": "Weight 6.2 kg, length 62 cm. Mixed feeding, breastmilk plus formula. Walang sipon o ubo.",
+   "fields": {"weight_kg": 6.2, "length_height_cm": 62, "breastfeeding": "partial", "colds": false, "cough": false}},
+  {"note": "Dumating para sa checkup lang.",
+   "fields": {}},
+  {"note": "PCV 3 and IPV given today. No fever, no rash.",
+   "fields": {"vaccines_given": ["PCV3", "IPV"], "fever": false, "rash": false}}
+]

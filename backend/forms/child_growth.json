@@ -1,0 +1,30 @@
+{
+  "form_type": "child_growth",
+  "title": {"en": "Child growth and immunization", "fil": "Paglaki at bakuna ng bata"},
+  "verification": "pending DOH review",
+  "default_follow_up_days": 28,
+  "fields": [
+    {"name": "weight_kg", "type": "number", "min": 0.5, "max": 60, "required": true, "ai": true,
+     "label": {"en": "Weight (kg)", "fil": "Timbang (kg)"}},
+    {"name": "length_height_cm", "type": "number", "min": 30, "max": 180, "ai": true,
+     "label": {"en": "Length/height (cm)", "fil": "Haba/taas (cm)"}},
+    {"name": "muac_cm", "type": "number", "min": 5, "max": 30, "ai": true,
+     "label": {"en": "MUAC (cm)", "fil": "MUAC (cm)"}},
+    {"name": "temperature_c", "type": "number", "min": 30, "max": 45, "ai": true,
+     "label": {"en": "Temperature (°C)", "fil": "Temperatura (°C)"}},
+    {"name": "vaccines_given", "type": "choices", "ai": true,
+     "options": ["BCG", "HepB", "Penta1", "Penta2", "Penta3", "OPV1", "OPV2", "OPV3", "IPV",
+                 "PCV1", "PCV2", "PCV3", "MMR1", "MMR2"],
+     "label": {"en": "Vaccines given today", "fil": "Mga bakunang ibinigay ngayon"}},
+    {"name": "vitamin_a_given", "type": "boolean", "ai": true,
+     "label": {"en": "Vitamin A given", "fil": "Nabigyan ng Vitamin A"}},
+    {"name": "breastfeeding", "type": "choice", "options": ["exclusive", "partial", "none"], "ai": true,
+     "label": {"en": "Breastfeeding", "fil": "Pagpapasuso"}},
+    {"name": "fever", "type": "boolean", "ai": true, "label": {"en": "Fever", "fil": "Lagnat"}},
+    {"name": "cough", "type": "boolean", "ai": true, "label": {"en": "Cough", "fil": "Ubo"}},
+    {"name": "colds", "type": "boolean", "ai": true, "label": {"en": "Colds", "fil": "Sipon"}},
+    {"name": "diarrhea", "type": "boolean", "ai": true, "label": {"en": "Diarrhea", "fil": "Pagtatae"}},
+    {"name": "vomiting", "type": "boolean", "ai": true, "label": {"en": "Vomiting", "fil": "Pagsusuka"}},
+    {"name": "rash", "type": "boolean", "ai": true, "label": {"en": "Rash", "fil": "Pantal"}}
+  ]
+}

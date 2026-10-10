@@ -24,5 +24,9 @@
   {"note": "Masikip ang dibdib at kapos sa paghinga. BP 150/95. Walang ubo.",
    "fields": {"chest_pain": true, "shortness_of_breath": true, "bp_systolic": 150, "bp_diastolic": 95, "cough": false}},
   {"note": "Sinisipon at masakit ang ulo at katawan, walang suka o pagtatae.",
-   "fields": {"colds": true, "headache": true, "body_pain": true, "vomiting": false, "diarrhea": false}}
+   "fields": {"colds": true, "headache": true, "body_pain": true, "vomiting": false, "diarrhea": false}},
+  {"note": "28 weeks, fundal height 27 cm, FHR 140. Binigyan ng Td2 at iron folic acid.",
+   "fields": {"weeks_pregnant": 28, "fundal_height_cm": 27, "fetal_heart_rate_bpm": 140, "td_dose": "Td2", "iron_folic_acid_given": true}},
+  {"note": "Timbang 58 kg, BP 110/70. Hindi pa nabigyan ng iron.",
+   "fields": {"weight_kg": 58, "bp_systolic": 110, "bp_diastolic": 70, "iron_folic_acid_given": false}}
 ]

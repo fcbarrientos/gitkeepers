@@ -14,6 +14,8 @@ from pathlib import Path
 
 from core.config import MODELS_DIR
 from core.extraction import PRENATAL_FIELDS, extract
+from core.forms import extraction_fields, get_form
+from core.pseudonymize import Pseudonymizer
 from evals.scoring import score_sample, summarize
 
 HERE = Path(__file__).resolve().parent
@@ -28,11 +30,23 @@ def load_samples(path) -> list:
     ]
 
 
-def evaluate(llm, samples, fields=PRENATAL_FIELDS, fewshot=None, glossary=None, on_sample=None) -> dict:
+def form_settings(form_type: str) -> tuple[dict, str, Path]:
+    """Fields, few-shot file and default samples file for a form's eval."""
+    form = get_form(form_type)
+    if form is None:
+        raise SystemExit(f"unknown form: {form_type}")
+    samples = HERE / ("samples.jsonl" if form_type == "prenatal" else f"samples_{form_type}.jsonl")
+    return extraction_fields(form), f"{form_type}_fewshot.json", samples
+
+
+def evaluate(llm, samples, fields=PRENATAL_FIELDS, fewshot=None, glossary=None, on_sample=None,
+             pseudonymize=False, fewshot_file="prenatal_fewshot.json") -> dict:
     results = []
     for s in samples:
+        # --pseudonymize sends the note through the same masking production uses.
+        note = Pseudonymizer().pseudonymize_text(s["note"]) if pseudonymize else s["note"]
         start = time.time()
-        out = extract(llm, s["note"], fields, fewshot, glossary)
+        out = extract(llm, note, fields, fewshot, glossary, fewshot_file=fewshot_file)
         seconds = time.time() - start
         correct = score_sample(s["expected"], out["fields"], fields)
         results.append({"id": s["id"], "note": s["note"], "expected": s["expected"],
@@ -54,12 +68,21 @@ def _rss_mb():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("models", nargs="+")
-    ap.add_argument("--samples", default=str(HERE / "samples.jsonl"))
+    ap.add_argument("--samples", default=None)
     ap.add_argument("--n-ctx", type=int, default=2048)
+    ap.add_argument("--pseudonymize", action="store_true",
+                    help="mask names, phones and places in each note first, as production does")
+    ap.add_argument("--form", default=None,
+                    help="evaluate a form's AI fields (prenatal, child_growth, bp_followup); "
+                         "omit for the original 19-field prenatal eval")
     args = ap.parse_args()
+    if args.form:
+        fields, fewshot_file, default_samples = form_settings(args.form)
+    else:
+        fields, fewshot_file, default_samples = PRENATAL_FIELDS, "prenatal_fewshot.json", HERE / "samples.jsonl"
+    samples = load_samples(args.samples or default_samples)
 
     from core.inference import LlamaCppLLM  # imported here so tests don't need llama-cpp-python
-    samples = load_samples(args.samples)
     report = {}
     for name in args.models:
         path = Path(name)
@@ -73,7 +96,8 @@ def main():
             peak[0] = max(peak[0], _rss_mb() or 0)
             print(f"  {r['id']}: {sum(r['correct'].values())}/{len(r['correct'])} fields right, {r['seconds']:.1f}s")
 
-        out = evaluate(llm, samples, on_sample=progress)
+        out = evaluate(llm, samples, fields, on_sample=progress, pseudonymize=args.pseudonymize,
+                       fewshot_file=fewshot_file)
         out["summary"]["peak_rss_mb"] = peak[0] or None
         report[path.name] = out
         del llm
@@ -91,7 +115,7 @@ def main():
         for r in out["results"]:
             for f, ok in r["correct"].items():
                 if not ok:
-                    print(f"  [{name}] {r['id']} {f}: expected {r['expected'].get(f)!r}, got {r['got'][f]!r}")
+                    print(f"  [{name}] {r['id']} {f}: expected {r['expected'].get(f)!r}, got {r['got'].get(f)!r}")
 
     results_dir = HERE / "results"
     results_dir.mkdir(exist_ok=True)

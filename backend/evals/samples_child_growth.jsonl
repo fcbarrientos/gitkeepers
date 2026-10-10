@@ -1,0 +1,14 @@
+// FAKE SCENARIOS NOT REAL
+
+{"id": "c01", "note": "Timbang ni baby ngayon 8.4 kilo, 71 cm ang haba. Nabakunahan ng Penta 3 at PCV 3.", "expected": {"weight_kg": 8.4, "length_height_cm": 71, "vaccines_given": ["Penta3", "PCV3"]}}
+{"id": "c02", "note": "Si baby ay 6 weeks old, binigyan ng Penta 1, OPV 1 at PCV 1. Timbang 4.6 kg. Exclusive breastfeeding.", "expected": {"weight_kg": 4.6, "vaccines_given": ["Penta1", "OPV1", "PCV1"], "breastfeeding": "exclusive"}}
+{"id": "c03", "note": "May sipon at ubo si bunso pero walang lagnat. 36.9 ang temp.", "expected": {"colds": true, "cough": true, "fever": false, "temperature_c": 36.9}}
+{"id": "c04", "note": "Nagtatae po si baby simula kahapon, nagsusuka rin. Timbang 7.0 kg.", "expected": {"diarrhea": true, "vomiting": true, "weight_kg": 7.0}}
+{"id": "c05", "note": "MUAC 11.2 cm lang, timbang 6.8 kg, 12 months old. Binigyan ng Vitamin A.", "expected": {"muac_cm": 11.2, "weight_kg": 6.8, "vitamin_a_given": true}}
+{"id": "c06", "note": "Weight 10.2 kg, height 80 cm. MMR 2 given. Wala nang dede, kumakain na at formula.", "expected": {"weight_kg": 10.2, "length_height_cm": 80, "vaccines_given": ["MMR2"], "breastfeeding": "none"}}
+{"id": "c07", "note": "Bagong panganak, 2.9 kilos. BCG at HepB ibinigay bago umuwi.", "expected": {"weight_kg": 2.9, "vaccines_given": ["BCG", "HepB"]}}
+{"id": "c08", "note": "May pantal sa katawan si baby at mainit, 38.5 ang temperatura.", "expected": {"rash": true, "temperature_c": 38.5, "fever": true}}
+{"id": "c09", "note": "Pinapasuso pa rin pero may halong formula. 5.9 kg, 63 cm.", "expected": {"breastfeeding": "partial", "weight_kg": 5.9, "length_height_cm": 63}}
+{"id": "c10", "note": "Penta 2, OPV 2, PCV 2 today. Walang lagnat after. Weight 5.5 kilos.", "expected": {"vaccines_given": ["Penta2", "OPV2", "PCV2"], "fever": false, "weight_kg": 5.5}}
+{"id": "c11", "note": "Follow-up timbang lang, 9.0 kg. Walang ubo, walang sipon.", "expected": {"weight_kg": 9.0, "cough": false, "colds": false}}
+{"id": "c12", "note": "IPV at OPV 3 naibigay. Hindi pa nabibigyan ng Vitamin A ngayong buwan.", "expected": {"vaccines_given": ["IPV", "OPV3"], "vitamin_a_given": false}}

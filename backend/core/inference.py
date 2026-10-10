@@ -1,5 +1,6 @@
 """Runtime-agnostic LLM interface, the rest of the app only uses this"""
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Iterator
 
 
@@ -13,6 +14,7 @@ class LLM(ABC):
 
 class LlamaCppLLM(LLM):
     def __init__(self, model_path: str, n_ctx: int = 4096):
+        self.model_name = Path(model_path).name
         from llama_cpp import Llama  # imported lazily so the rest runs without it
         self.llm = Llama(model_path=model_path, n_ctx=n_ctx, verbose=False)
 

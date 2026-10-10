@@ -3,6 +3,7 @@ uvicorn
 sqlite-vec
 platformdirs
 cryptography
+httpx  # test-only: required by fastapi.testclient
 # Install when you're ready to run a model:
 huggingface_hub
 llama-cpp-python

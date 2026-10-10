@@ -21,5 +21,18 @@
   "masakit ang tiyan / sakit ng tiyan": "abdominal pain / stomach pain",
   "pagtatae / nagtatae": "diarrhea",
   "pantal / rashes": "rash",
-  "masakit ang katawan / nananakit ang katawan": "body pain / body ache"
+  "masakit ang katawan / nananakit ang katawan": "body pain / body ache",
+  "timbang": "weight",
+  "haba / taas (ng bata)": "length / height",
+  "bakuna / nabakunahan / naibigay": "vaccine / vaccinated / given",
+  "Penta 1, OPV 2, PCV 3, Hepa B, MMR 1": "write vaccines exactly as options: Penta1, OPV2, PCV3, HepB, MMR1",
+  "puro gatas ng ina / pinapasuso lang": "breastfeeding = exclusive",
+  "may halong formula / mixed feeding": "breastfeeding = partial",
+  "hindi na nagpapasuso / formula na / wala nang dede": "breastfeeding = none",
+  "pulso": "pulse",
+  "malabo ang paningin": "blurred vision",
+  "kinakapos ng hininga": "shortness of breath",
+  "paninikip ng dibdib": "chest pain",
+  "maintenance / gamot sa altapresyon": "maintenance medicine (on_maintenance_meds)",
+  "nakainom na ng gamot": "took_meds_today = true"
 }

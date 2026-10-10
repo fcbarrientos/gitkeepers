@@ -4,20 +4,25 @@ import sqlite3
 from collections.abc import Iterator
 from pathlib import Path
 
-from core.config import DB_PATH, MIGRATIONS_DIR, ensure_dirs
+from core import config
 
 
-def connect(db_path: Path = DB_PATH) -> sqlite3.Connection:
-    ensure_dirs()
-    conn = sqlite3.connect(db_path)
+def connect(db_path: Path | None = None) -> sqlite3.Connection:
+    config.ensure_dirs()
+    # FastAPI may open a request's connection in one worker thread and use it in
+    # another; each connection still serves only one request at a time.
+    conn = sqlite3.connect(
+        db_path or config.DB_PATH, timeout=config.DB_BUSY_TIMEOUT_SECONDS, check_same_thread=False
+    )
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
     return conn
 
 
-def migrate(conn: sqlite3.Connection, migrations_dir: Path = MIGRATIONS_DIR) -> list[str]:
+def migrate(conn: sqlite3.Connection, migrations_dir: Path | None = None) -> list[str]:
     """Apply any unapplied NNN_name.sql files in order. Returns names applied."""
+    migrations_dir = migrations_dir or config.MIGRATIONS_DIR
     conn.execute(
         "CREATE TABLE IF NOT EXISTS schema_version ("
         "version INTEGER PRIMARY KEY, name TEXT NOT NULL, "

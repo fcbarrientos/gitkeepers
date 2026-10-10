@@ -1,0 +1,14 @@
+// FAKE SCENARIOS NOT REAL
+
+{"id": "b01", "note": "BP 142/90 ngayon, pulso 80. Umiinom siya ng amlodipine araw-araw at nakainom na kanina.", "expected": {"bp_systolic": 142, "bp_diastolic": 90, "pulse_bpm": 80, "on_maintenance_meds": true, "took_meds_today": true}}
+{"id": "b02", "note": "155 over 98 ang presyon ni Aling Rosa. Nahihilo daw siya kaninang umaga.", "expected": {"bp_systolic": 155, "bp_diastolic": 98, "dizziness": true}}
+{"id": "b03", "note": "Walang sakit ng ulo at hindi malabo ang paningin. 126/80.", "expected": {"headache": false, "blurred_vision": false, "bp_systolic": 126, "bp_diastolic": 80}}
+{"id": "b04", "note": "Timbang 81 kg, BP 138/88. Nakalimutan uminom ng gamot ngayong araw.", "expected": {"weight_kg": 81, "bp_systolic": 138, "bp_diastolic": 88, "took_meds_today": false}}
+{"id": "b05", "note": "180/110 ang BP, masakit ang dibdib at hirap huminga.", "expected": {"bp_systolic": 180, "bp_diastolic": 110, "chest_pain": true, "shortness_of_breath": true}}
+{"id": "b06", "note": "Wala siyang maintenance na gamot. Presyon 134/86, pulse 76.", "expected": {"on_maintenance_meds": false, "bp_systolic": 134, "bp_diastolic": 86, "pulse_bpm": 76}}
+{"id": "b07", "note": "Blood pressure 120/80. Feels fine, no headache.", "expected": {"bp_systolic": 120, "bp_diastolic": 80, "headache": false}}
+{"id": "b08", "note": "Malabo ang paningin at masakit ang ulo, 162/96.", "expected": {"blurred_vision": true, "headache": true, "bp_systolic": 162, "bp_diastolic": 96}}
+{"id": "b09", "note": "Pulso 96, BP 148 over 94. Hindi kinakapos ng hininga.", "expected": {"pulse_bpm": 96, "bp_systolic": 148, "bp_diastolic": 94, "shortness_of_breath": false}}
+{"id": "b10", "note": "Regular na umiinom ng losartan. 130/84 ngayon, walang hilo.", "expected": {"on_maintenance_meds": true, "bp_systolic": 130, "bp_diastolic": 84, "dizziness": false}}
+{"id": "b11", "note": "BP check lang po, 136/88.", "expected": {"bp_systolic": 136, "bp_diastolic": 88}}
+{"id": "b12", "note": "Weight 65.5 kg, BP 152/97. Walang chest pain pero nahihilo.", "expected": {"weight_kg": 65.5, "bp_systolic": 152, "bp_diastolic": 97, "chest_pain": false, "dizziness": true}}

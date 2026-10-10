@@ -1,0 +1,22 @@
+:root {
+  --blue-900: #10226b;
+  --blue-800: #162f8f;
+  --blue-700: #1d3fbf;
+  --blue-100: #dfe6fb;
+  --blue-50: #f1f4fd;
+  --gold-600: #8a6410;
+  --gold-500: #e0b13a;
+  --gold-100: #fdf3d6;
+  --white: #ffffff;
+  --ink: #18203a;
+  --muted: #5a6280;
+  --line: #d9deea;
+  --danger: #b42318;
+  --danger-bg: #fdecea;
+  --ok: #1a7f37;
+  --ok-bg: #e6f4ea;
+  --radius: 16px;
+  --radius-small: 10px;
+  --shadow: 0 1px 2px rgb(16 34 107 / 0.08), 0 4px 16px rgb(16 34 107 / 0.06);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+}
